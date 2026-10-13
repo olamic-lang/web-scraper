@@ -1,15 +1,19 @@
 import csv
 import os
+import time
 
 import requests
 from bs4 import BeautifulSoup
 
-URL = "https://books.toscrape.com/"
+BASE_URL = "https://books.toscrape.com/catalogue/page-{}.html"
 OUTPUT_PATH = "output/books.csv"
+DELAY_SECONDS = 1
 
 
 def fetch_page(url):
     response = requests.get(url, timeout=10)
+    if response.status_code == 404:
+        return None
     response.raise_for_status()
     response.encoding = "utf-8"
     return response.text
@@ -25,6 +29,21 @@ def parse_books(html):
     return books
 
 
+def scrape_all_pages():
+    books = []
+    page = 1
+    while True:
+        html = fetch_page(BASE_URL.format(page))
+        if html is None:
+            break
+        page_books = parse_books(html)
+        books.extend(page_books)
+        print(f"Page {page}: {len(page_books)} books")
+        page += 1
+        time.sleep(DELAY_SECONDS)
+    return books
+
+
 def save_to_csv(books, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", newline="", encoding="utf-8") as f:
@@ -34,8 +53,7 @@ def save_to_csv(books, path):
 
 
 def main():
-    html = fetch_page(URL)
-    books = parse_books(html)
+    books = scrape_all_pages()
     save_to_csv(books, OUTPUT_PATH)
     print(f"Saved {len(books)} books to {OUTPUT_PATH}")
 
