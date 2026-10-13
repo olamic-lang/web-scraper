@@ -1,7 +1,11 @@
+import csv
+import os
+
 import requests
 from bs4 import BeautifulSoup
 
 URL = "https://books.toscrape.com/"
+OUTPUT_PATH = "output/books.csv"
 
 
 def fetch_page(url):
@@ -21,12 +25,19 @@ def parse_books(html):
     return books
 
 
+def save_to_csv(books, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["title", "price"])
+        writer.writeheader()
+        writer.writerows(books)
+
+
 def main():
     html = fetch_page(URL)
     books = parse_books(html)
-    for book in books[:5]:
-        print(book["title"], "-", book["price"])
-    print(f"Found {len(books)} books")
+    save_to_csv(books, OUTPUT_PATH)
+    print(f"Saved {len(books)} books to {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":
