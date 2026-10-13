@@ -17,7 +17,7 @@ A command-line web scraper built with Python that collects the title and price o
 ## Setup
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/olamic-lang/web-scraper.git
 cd web-scraper
 python -m venv venv
 source venv/bin/activate
